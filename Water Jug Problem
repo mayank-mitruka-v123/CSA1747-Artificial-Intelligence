@@ -1,0 +1,68 @@
+from collections import deque
+
+# Function to perform BFS to solve the Water Jug Problem and show the steps
+def water_jug_bfs(jug1_capacity, jug2_capacity, target_amount):
+    # Initial state: both jugs are empty (0, 0)
+    start_state = (0, 0)
+    
+    # Queue for BFS, each entry is a tuple (current_state, path_taken)
+    queue = deque([(start_state, [])])
+    
+    # Set to keep track of visited states
+    visited = set()
+    visited.add(start_state)
+    
+    # Loop through the queue until a solution is found or no more states to explore
+    while queue:
+        (jug1, jug2), path = queue.popleft()
+        
+        # If either jug contains the target amount, return the path (steps) to the solution
+        if jug1 == target_amount or jug2 == target_amount:
+            path.append((jug1, jug2))
+            return path
+        
+        # Generate all possible states from the current state
+        possible_states = set()
+        
+        # Fill jug1
+        possible_states.add((jug1_capacity, jug2))
+        
+        # Fill jug2
+        possible_states.add((jug1, jug2_capacity))
+        
+        # Empty jug1
+        possible_states.add((0, jug2))
+        
+        # Empty jug2
+        possible_states.add((jug1, 0))
+        
+        # Pour water from jug1 to jug2
+        pour_to_jug2 = min(jug1, jug2_capacity - jug2)
+        possible_states.add((jug1 - pour_to_jug2, jug2 + pour_to_jug2))
+        
+        # Pour water from jug2 to jug1
+        pour_to_jug1 = min(jug2, jug1_capacity - jug1)
+        possible_states.add((jug1 + pour_to_jug1, jug2 - pour_to_jug1))
+        
+        # Explore all possible states
+        for state in possible_states:
+            if state not in visited:
+                visited.add(state)
+                queue.append((state, path + [(jug1, jug2)]))
+    
+    # If no solution is found, return None
+    return None
+
+# Example usage
+jug1_capacity = 4
+jug2_capacity = 3
+target_amount = 2
+
+steps = water_jug_bfs(jug1_capacity, jug2_capacity, target_amount)
+
+if steps:
+    print(f"Yes, it's possible to measure exactly {target_amount} liters. Here are the steps:")
+    for step in steps:
+        print(f"Jug 1: {step[0]} gallons, Jug 2: {step[1]} gallons")
+else:
+    print(f"No, it's not possible to measure exactly {target_amount} liters.")
