@@ -1,0 +1,57 @@
+from collections import deque
+
+# Define the goal state
+GOAL_STATE = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+# BFS to solve the 8-puzzle problem
+def bfs(start_state):
+    queue = deque([start_state])  # Queue for BFS
+    visited = set()  # Set to track visited states
+    visited.add(start_state)
+    parent = {start_state: None}  # Track the parent state for path reconstruction
+
+    while queue:
+        current = queue.popleft()
+
+        # If the current state is the goal, reconstruct the path
+        if current == GOAL_STATE:
+            path = []
+            while current:
+                path.append(current)
+                current = parent[current]
+            return path[::-1]
+
+        # Find the empty tile (0)
+        zero_index = current.index(0)
+        zero_x, zero_y = divmod(zero_index, 3)
+
+        # Possible moves: up, down, left, right
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        for dx, dy in moves:
+            new_x, new_y = zero_x + dx, zero_y + dy
+            if 0 <= new_x < 3 and 0 <= new_y < 3:
+                new_zero_index = new_x * 3 + new_y
+                new_state = list(current)
+                # Swap the empty tile (0) with the adjacent tile
+                new_state[zero_index], new_state[new_zero_index] = new_state[new_zero_index], new_state[zero_index]
+                new_state = tuple(new_state)
+
+                # Only add the new state if it hasn't been visited
+                if new_state not in visited:
+                    visited.add(new_state)
+                    parent[new_state] = current
+                    queue.append(new_state)
+
+    return None  # No solution found
+
+# Example usage
+start_state = (1, 2, 3, 4, 5, 6, 0, 8, 7)  # Change this to test different puzzles
+solution = bfs(start_state)
+
+if solution:
+    print("Solution found:")
+    for step in solution:
+        print(step)
+else:
+    print("No solution found")
